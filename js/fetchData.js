@@ -2,33 +2,65 @@
 
 function fetchData(){
 
-	
-
+	var paperList = [];
 
 	//read raw data from json
 	$.getJSON( "examples.json", function( data ) {
   		$.each( data, function( key, val ) {
-    		if(key == "papers") {
-    			var papers = val;
-    			$.each(papers, function(paperkey, paperval) {
-    				//console.log(paperval);
+    		
+			var papers = val;
+			paperList = [];
+			$.each(papers, function(paperkey, paperval) {
+				//console.log(paperval);
+				paperList.push(paperval);
 
-    				var image = paperval.image;
-    				var title = paperval.title;
-    				var authors = paperval.authors;
-    				var summary = paperval.summary;
+			});
 
-    				addExample(image, title, authors, summary);
+			//order the list by year
+			paperList.sort(function(a, b){ return b.year - a.year;});
 
-    			});
-    		}
+			//console.log(paperList);
+
+			//add section title
+			addSectionTitle(key);
+
+			for(var i = 0; i < paperList.length; i ++) {
+				var paper  = paperList[i];
+				var image = paper.image;
+				var title = paper.title;
+				var authors = paper.authors;
+				var abstract = paper.abstract;
+				var summary = paper.summary;
+				var year = paper.year;
+				addExample(image, title, year, authors, abstract, summary);
+			}
+
   		});
  	});
 
 }
 
 
-function addExample(imageStr, titleStr, authorsStr, summaryStr) {
+function addSectionTitle(titleStr) {
+	var container = document.getElementById("example-container");
+
+	var divider = document.createElement("div");
+	divider.className = "ui";
+	divider.classList.add("hidden");
+	divider.classList.add("divider");
+
+	var title = document.createElement("h3");
+	title.className = "ui";
+	title.classList.add("header");
+	title.innerHTML = titleStr;
+
+	container.appendChild(divider);
+	container.appendChild(title);
+
+}
+
+
+function addExample(imageStr, titleStr, yearStr, authorsStr, abstractStr, summaryStr) {
 
 	var container = document.getElementById("example-container");
 
@@ -51,7 +83,7 @@ function addExample(imageStr, titleStr, authorsStr, summaryStr) {
 	example.appendChild(contentDiv);
 	var header = document.createElement("a");
 	header.className = "header";
-	header.innerHTML = titleStr;  //`${this.category}`
+	header.innerHTML = titleStr + " (" + yearStr + ")";  //`${this.category}`
 	contentDiv.appendChild(header);
 	var author = document.createElement("div");
 	author.className = "meta";
@@ -62,7 +94,8 @@ function addExample(imageStr, titleStr, authorsStr, summaryStr) {
 	var abstract = document.createElement("div");
 	abstract.className = "description";
 	var meta_abstract = document.createElement("p");
-	meta_abstract.innerHTML = "abstract empty";
+	meta_abstract.className = "activeP";
+	meta_abstract.innerHTML = abstractStr;
 	abstract.appendChild(meta_abstract);
 	contentDiv.appendChild(abstract);
 	var summary = document.createElement("div");
